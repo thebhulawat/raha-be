@@ -1,4 +1,5 @@
 import { Server as HttpServer, createServer } from "http";
+import 'dotenv/config' 
 import {RawData, WebSocket} from "ws"
 import Retell from "retell-sdk";
 import expressWs from 'express-ws'
@@ -7,10 +8,8 @@ import cors from "cors"
 import { CustomLlmRequest, CustomLlmResponse } from "./types/types";
 import { OpenAiClient } from "./llm/openai";
 import { RetellClient } from "./retell/client";
+import {ClerkExpressRequireAuth, WithAuthProp} from '@clerk/clerk-sdk-node'
 
-import dotenv from 'dotenv';
-import { error } from "console";
-dotenv.config();
 
 
 export class Server {
@@ -20,14 +19,21 @@ export class Server {
 
     constructor() {
         this.app = expressWs(express()).app
+        // Middlewares
         this.app.use(express.json())
         this.app.use(cors())
         this.app.use(express.urlencoded({extended: true}))
+        const clerkAuth = ClerkExpressRequireAuth()
+        this.app.use(clerkAuth)
+
+        // Set up dependencies
         this.retellClient = new RetellClient()
+        
+        // Set up routes 
         this.handleRetellLlmWebSocket() 
         this.createPhoneCall()
         this.handleWebhook()
-        this.helloRaha()     
+        this.helloRaha()    
     }
 
     
@@ -66,9 +72,14 @@ export class Server {
 
     helloRaha() {
         this.app.get("/", (req: Request, res: Response) => {
-            res.json({message: "hello Raha"})
-
-        })
+            const auth = (req as WithAuthProp<Request>).auth;
+            if (!auth) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+            
+            console.log("Authenticated user:", auth);
+            res.json({ message: "hello Raha", user: auth });
+        });
     }
 
     createPhoneCall() {
