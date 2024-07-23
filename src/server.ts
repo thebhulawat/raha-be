@@ -1,4 +1,3 @@
-import { Server as HttpServer, createServer } from 'http';
 import 'dotenv/config';
 import { RawData, WebSocket } from 'ws';
 import Retell from 'retell-sdk';
@@ -8,11 +7,7 @@ import cors from 'cors';
 import { CustomLlmRequest, CustomLlmResponse } from './types/types';
 import { OpenAiClient } from './llm/openai';
 import { RetellClient } from './retell/client';
-import {
-  ClerkExpressRequireAuth,
-  WithAuthProp,
-  createClerkClient,
-} from '@clerk/clerk-sdk-node';
+import { ClerkExpressRequireAuth, WithAuthProp } from '@clerk/clerk-sdk-node';
 
 export class Server {
   public app: expressWs.Application;
@@ -23,13 +18,13 @@ export class Server {
     // Middlewares
     this.app.use(express.json());
     this.app.use(cors());
-    this.app.use(express.urlencoded({ extended: true })); 
+    this.app.use(express.urlencoded({ extended: true }));
     this.app.use(ClerkExpressRequireAuth());
 
-    // handle errors 
-    this.app.use((err: any, req: any, res: any, next:any) => {
-    console.error(err.stack);
-    res.status(401).send('Unauthenticated!');
+    // handle errors
+    this.app.use((err: any, req: any, res: any, next: any) => {
+      console.error(err.stack);
+      res.status(401).send('Unauthenticated!');
     });
 
     // Set up dependencies
@@ -50,7 +45,7 @@ export class Server {
   helloRaha() {
     this.app.get('/', (req: Request, res: Response) => {
       const auth = (req as WithAuthProp<Request>).auth;
-      console.log('Authenticated user:', auth);
+      // console.log('Authenticated user:', auth);
       res.json({ message: 'hello Raha', user: auth });
     });
   }
@@ -87,7 +82,6 @@ export class Server {
       res.json({ received: true });
     });
   }
-
 
   createPhoneCall() {
     this.app.post('/create-phone-call', async (req: Request, res: Response) => {
