@@ -23,11 +23,14 @@ export class Server {
     // Middlewares
     this.app.use(express.json());
     this.app.use(cors());
-    this.app.use(express.urlencoded({ extended: true }));
-    const clerkAuth = ClerkExpressRequireAuth({
-      jwtKey: process.env.CLERK_JWT_KEY,
+    this.app.use(express.urlencoded({ extended: true })); 
+    this.app.use(ClerkExpressRequireAuth());
+
+    // handle errors 
+    this.app.use((err: any, req: any, res: any, next:any) => {
+    console.error(err.stack);
+    res.status(401).send('Unauthenticated!');
     });
-    this.app.use(clerkAuth);
 
     // Set up dependencies
     this.retellClient = new RetellClient();
@@ -42,6 +45,14 @@ export class Server {
   listen(port: number): void {
     this.app.listen(port);
     console.log('Listening on port ' + port);
+  }
+
+  helloRaha() {
+    this.app.get('/', (req: Request, res: Response) => {
+      const auth = (req as WithAuthProp<Request>).auth;
+      console.log('Authenticated user:', auth);
+      res.json({ message: 'hello Raha', user: auth });
+    });
   }
 
   /* This webhook is used to handle webhooks from retell servers which has a number of events. We will be handling all the events here. */
@@ -77,17 +88,6 @@ export class Server {
     });
   }
 
-  helloRaha() {
-    this.app.get('/', (req: Request, res: Response) => {
-      const auth = (req as WithAuthProp<Request>).auth;
-      if (!auth) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-
-      console.log('Authenticated user:', auth);
-      res.json({ message: 'hello Raha', user: auth });
-    });
-  }
 
   createPhoneCall() {
     this.app.post('/create-phone-call', async (req: Request, res: Response) => {
