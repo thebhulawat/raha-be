@@ -6,7 +6,6 @@ import {
   timestamp,
   jsonb,
   json,
-  foreignKey,
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {

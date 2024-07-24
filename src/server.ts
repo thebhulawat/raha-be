@@ -11,6 +11,7 @@ import handleRetellLlmWebSocket from './controllers/retellLlmWebScoketController
 import  handleRetellWebhook from './controllers/webhook/retellWebhookController';
 import handleClerkWebhook from './controllers/webhook/clerkWebhookController';
 import { requireAuth } from './middleware/authMiddleware';
+import getCalls from './controllers/getCallsController';
 
 export class Server {
   public app: expressWs.Application;
@@ -34,9 +35,13 @@ export class Server {
   }
 
   private setupRoutes() {
+    // Authenticated routes 
     this.app.get('/', requireAuth, helloRaha);
+    this.app.get('/calls', requireAuth, getCalls)
     this.app.post('/create-phone-call', requireAuth, createPhoneCall);
+    // Websocket route 
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
+    // Webhooks 
     this.app.post('/webhook', handleRetellWebhook);
     this.app.post(
       '/clerk-webhook',
