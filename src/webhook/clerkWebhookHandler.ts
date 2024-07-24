@@ -3,6 +3,7 @@ import { Webhook } from 'svix';
 import { db} from '../db'; 
 import { usersTable, InsertUser } from '../db/schema'; 
 import { eq } from 'drizzle-orm';
+import { log } from 'console';
 
 export default async function handleClerkWebhookContoller(req: Request, res: Response) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
@@ -20,8 +21,6 @@ export default async function handleClerkWebhookContoller(req: Request, res: Res
   if (!svix_id || !svix_timestamp || !svix_signature) {
     return res.status(400).json({"error": "No svix headers"});
   }
-
-  console.log('Svix Headers:', { svix_id, svix_timestamp, svix_signature });
 
   // Get the body
   const body = JSON.stringify(req.body);
@@ -109,6 +108,8 @@ async function handleUserCreated(data: any) {
   };
 
   await db.insert(usersTable).values(newUser);
+  console.log('User added via clerk sync', id);
+  
 }
 
 async function handleUserUpdated(data: any) {
@@ -121,7 +122,7 @@ async function handleUserUpdated(data: any) {
   if (!id) {
     throw new Error("Clerk Id is required");
   }
-  
+
   if (!name) {
     throw new Error("User name is required");
   }
@@ -140,9 +141,12 @@ async function handleUserUpdated(data: any) {
   await db.update(usersTable)
     .set(updatedUser)
     .where(eq(usersTable.clerkId, id));
+  console.log('User updated via clerk sync', id);
 }
 
 async function handleUserDeleted(data: any) {
   const { id } = data;
   await db.delete(usersTable).where(eq(usersTable.clerkId, id));
+  console.log('User deleted via clerk sync', id);
+  
 }
