@@ -1,4 +1,11 @@
-import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  json,
+} from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -28,8 +35,9 @@ export const scheduleTable = pgTable('schedule', {
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
-  frequency: text('frequency', { enum: ['daily', 'weekly', 'monthly'] }).notNull(),
+  frequency: text('frequency', { enum: ['daily', 'weekly'] }).notNull(),
   lastCallTimestamp: timestamp('last_call_timestamp'),
+  activeDays: json('active_days').notNull().$type<number[]>(),
 });
 
 export type InsertSchedule = typeof scheduleTable.$inferInsert;

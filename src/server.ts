@@ -8,10 +8,12 @@ import { CustomLlmRequest, CustomLlmResponse } from './types/types';
 import { OpenAiClient } from './llm/openai';
 import { RetellClient } from './retell/client';
 import { ClerkExpressRequireAuth, WithAuthProp } from '@clerk/clerk-sdk-node';
+import { CallScheduler } from './scheduler/callScheduler';
 
 export class Server {
   public app: expressWs.Application;
   private retellClient: RetellClient;
+  private callScheduler: CallScheduler;
 
   constructor() {
     this.app = expressWs(express()).app;
@@ -35,11 +37,16 @@ export class Server {
     this.createPhoneCall();
     this.handleWebhook();
     this.helloRaha();
+    this.callScheduler = new CallScheduler(
+      `http://localhost:${process.env.PORT || 3000}`
+    );
   }
 
   listen(port: number): void {
     this.app.listen(port);
     console.log('Listening on port ' + port);
+    this.callScheduler.start();
+    console.log('Call scheduler started');
   }
 
   helloRaha() {
@@ -85,9 +92,9 @@ export class Server {
 
   createPhoneCall() {
     this.app.post('/create-phone-call', async (req: Request, res: Response) => {
-      this.retellClient.createCall('+919627263519');
+      const { phoneNumber } = req.body;
       try {
-        const result = await this.retellClient.createCall('+91-9627263519');
+        const result = await this.retellClient.createCall(phoneNumber);
         res.status(200).json(result);
       } catch (err) {
         if (err instanceof Error) {
