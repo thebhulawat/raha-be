@@ -12,6 +12,7 @@ import  handleRetellWebhook from './controllers/webhook/retellWebhookController'
 import handleClerkWebhook from './controllers/webhook/clerkWebhookController';
 import { requireAuth } from './middleware/authMiddleware';
 import getCalls from './controllers/getCallsController';
+import createSchedule from './controllers/createScheduleController';
 
 export class Server {
   public app: expressWs.Application;
@@ -39,8 +40,11 @@ export class Server {
     this.app.get('/', requireAuth, helloRaha);
     this.app.get('/calls', requireAuth, getCalls)
     this.app.post('/create-phone-call', requireAuth, createPhoneCall);
+    this.app.post('/create-schedule', requireAuth, createSchedule);
+    
     // Websocket route 
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
+    
     // Webhooks 
     this.app.post('/webhook', handleRetellWebhook);
     this.app.post(
