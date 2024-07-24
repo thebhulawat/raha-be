@@ -5,7 +5,7 @@ import { usersTable, InsertUser } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { log } from 'console';
 
-export default async function handleClerkWebhookContoller(req: Request, res: Response) {
+export default async function handleClerkWebhook(req: Request, res: Response) {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET) {
     throw new Error("You need a WEBHOOK_SECRET in your .env");

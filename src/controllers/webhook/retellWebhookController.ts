@@ -1,7 +1,7 @@
 import Retell from 'retell-sdk';
 import { Request, Response } from 'express';
 
-export default async function handleRetellWebhookController(req:Request, res: Response) {
+export default async function handleRetellWebhook(req:Request, res: Response) {
     const retell_api_key = process.env.RETELL_API_KEY || '';
       if (
         !Retell.verify(

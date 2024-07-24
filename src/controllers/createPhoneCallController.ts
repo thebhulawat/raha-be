@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { RetellClient } from '../clients/retellClient';
 
-export default async function createPhoneCallController(req: Request, res: Response) {
+export default async function createPhoneCall(req: Request, res: Response) {
   const { phoneNumber } = req.body;
   const retellClient = new RetellClient();
 

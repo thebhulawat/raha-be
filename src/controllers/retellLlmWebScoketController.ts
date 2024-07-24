@@ -4,7 +4,7 @@ import { CustomLlmRequest, CustomLlmResponse } from '../types/types';
 import { OpenAiClient } from '../clients/openai';
 import { processTranscript } from '../utils/transcriptProcessor';
 
-export default function handleRetellLlmWebSocketController(ws: WebSocket, req: Request) {
+export default function handleRetellLlmWebSocket(ws: WebSocket, req: Request) {
   const callId = req.params.call_id;
   console.log('Handle llm ws for: ', callId);
   let fullTranscript: any[] = [];
