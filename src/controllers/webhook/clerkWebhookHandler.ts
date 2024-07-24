@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Webhook } from 'svix';
-import { db} from '../db'; 
-import { usersTable, InsertUser } from '../db/schema'; 
+import { db} from '../../db'; 
+import { usersTable, InsertUser } from '../../db/schema'; 
 import { eq } from 'drizzle-orm';
 import { log } from 'console';
 
