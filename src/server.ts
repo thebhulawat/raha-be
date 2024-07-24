@@ -5,14 +5,13 @@ import expressWs from 'express-ws';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { CustomLlmRequest, CustomLlmResponse } from './types/types';
-import { OpenAiClient } from './llm/openai';
-import { RetellClient } from './retell/client';
+import { OpenAiClient } from './clients/openai';
+import { RetellClient } from './clients/retellClient';
 import { ClerkExpressRequireAuth, WithAuthProp } from '@clerk/clerk-sdk-node';
-import { CallScheduler } from './scheduler/callScheduler';
-import { Webhook } from 'svix';
+import { CallScheduler } from './utils/callScheduler';
 import bodyParser from 'body-parser';
-import {buffer} from 'micro'
-import  handleClerkWebhookContoller from './webhook/clerkWebhookHandler';
+import handleClerkWebhookContoller from './webhook/clerkWebhookHandler';
+import { processTranscript } from './utils/transcriptProcessor';
 
 export class Server {
   public app: expressWs.Application;
@@ -25,13 +24,6 @@ export class Server {
     this.app.use(express.json());
     this.app.use(cors());
     this.app.use(express.urlencoded({ extended: true }));
-    //this.app.use(ClerkExpressRequireAuth());
-
-    // handle errors
-    // this.app.use((err: any, req: any, res: any, next: any) => {
-    //   console.error(err.stack);
-    //   res.status(401).send('Unauthenticated!');
-    // });
 
     // Set up dependencies
     this.retellClient = new RetellClient();
@@ -56,16 +48,19 @@ export class Server {
   }
 
   helloRaha() {
-    this.app.get('/', (req: Request, res: Response) => {
-      const auth = (req as WithAuthProp<Request>).auth;
-      // console.log('Authenticated user:', auth);
-      res.json({ message: 'hello Raha', user: auth });
-    });
+    this.app.get(
+      '/',
+      ClerkExpressRequireAuth(),
+      (req: Request, res: Response) => {
+        const auth = (req as WithAuthProp<Request>).auth;
+        res.json({ message: 'hello Raha', user: auth });
+      }
+    );
   }
 
   handleClerkWebhook() {
     this.app.post(
-      "/clerk-webhook",
+      '/clerk-webhook',
       bodyParser.raw({ type: 'application/json' }),
       handleClerkWebhookContoller
     );
@@ -86,12 +81,14 @@ export class Server {
         return;
       }
       const content = req.body;
+      console.log('in webhook', content);
       switch (content.event) {
         case 'call_started':
           console.log('Call started event received ', content.data.call_id);
           break;
         case 'call_ended':
           console.log('Call ended event received', content.data.call_id);
+          console.log('Nishcal', content);
           break;
         case 'call_analyzed':
           console.log('Call analyzed event received', content.data.call_id);
@@ -105,23 +102,28 @@ export class Server {
   }
 
   createPhoneCall() {
-    this.app.post('/create-phone-call', async (req: Request, res: Response) => {
-      const { phoneNumber } = req.body;
-      try {
-        const result = await this.retellClient.createCall(phoneNumber);
-        res.status(200).json(result);
-      } catch (err) {
-        if (err instanceof Error) {
-          if (err.message === 'Retell phone number is not configured') {
-            res.status(500).json({ error: 'Server configuration error' });
+    this.app.post(
+      '/create-phone-call',
+      ClerkExpressRequireAuth(),
+      async (req: Request, res: Response) => {
+        const { phoneNumber } = req.body;
+        console.log('Here', req);
+        try {
+          const result = await this.retellClient.createCall(phoneNumber);
+          res.status(200).json(result);
+        } catch (err) {
+          if (err instanceof Error) {
+            if (err.message === 'Retell phone number is not configured') {
+              res.status(500).json({ error: 'Server configuration error' });
+            } else {
+              res.status(400).json({ error: err.message });
+            }
           } else {
-            res.status(400).json({ error: err.message });
+            res.status(500).json({ error: 'An unexpected error occurred' });
           }
-        } else {
-          res.status(500).json({ error: 'An unexpected error occurred' });
         }
       }
-    });
+    );
   }
 
   handleRetellLlmWebSocket() {
@@ -131,6 +133,7 @@ export class Server {
         try {
           const callId = req.params.call_id;
           console.log('Handle llm ws for: ', callId);
+          let fullTranscript: any[] = [];
 
           // Send config to Retell server
           const config: CustomLlmResponse = {
@@ -150,6 +153,7 @@ export class Server {
           });
           ws.on('close', (err) => {
             console.error('Closing llm ws for: ', callId);
+            processTranscript(fullTranscript, callId);
           });
 
           ws.on('message', async (data: RawData, isBinary: boolean) => {
@@ -180,7 +184,8 @@ export class Server {
               };
               ws.send(JSON.stringify(pingpongResponse));
             } else if (request.interaction_type === 'update_only') {
-              // process live transcript update if needed
+              fullTranscript = request.transcript;
+              console.log('Transcript updated:', request);
             }
           });
         } catch (err) {

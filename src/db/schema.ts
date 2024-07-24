@@ -4,7 +4,9 @@ import {
   serial,
   text,
   timestamp,
+  jsonb,
   json,
+  foreignKey,
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
@@ -23,7 +25,9 @@ export const callsTable = pgTable('calls', {
   date: timestamp('date').notNull(),
   title: text('title').notNull(),
   summary: text('summary').notNull(),
-  transcript: text('transcript').notNull(),
+  transcript: jsonb('transcript')
+    .notNull()
+    .$type<Array<{ role: string; content: string }>>(),
   insights: text('insights').notNull(),
   userId: integer('user_id')
     .notNull()

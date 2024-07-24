@@ -1,5 +1,5 @@
 {
-  "id": "879ebc19-a695-4f34-bfea-c51f90beeaf4",
+  "id": "27522935-653d-4237-8733-f53d7e3ff845",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -34,7 +34,7 @@
         },
         "transcript": {
           "name": "transcript",
-          "type": "text",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
@@ -109,6 +109,12 @@
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
+        },
+        "active_days": {
+          "name": "active_days",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -140,8 +146,20 @@
           "primaryKey": true,
           "notNull": true
         },
+        "clerk_id": {
+          "name": "clerk_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -168,7 +186,7 @@
           "name": "phone_number",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         }
       },
       "indexes": {},

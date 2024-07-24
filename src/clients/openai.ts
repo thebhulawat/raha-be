@@ -20,7 +20,7 @@ export class OpenAiClient {
 
   constructor() {
     this.client = new OpenAI({
-      apiKey: process.env.OPENAI_APIKEY,
+      apiKey: process.env.OPENAI_API_KEY,
       organization: process.env.OPENAI_ORGANIZATION_ID,
     });
   }
@@ -89,7 +89,7 @@ export class OpenAiClient {
 
     try {
       const events = await this.client.chat.completions.create({
-        model: 'gpt-3.5-turbo-1106',
+        model: 'gpt-4o-mini',
         messages: requestMessages,
         stream: true,
         temperature: 0.3,

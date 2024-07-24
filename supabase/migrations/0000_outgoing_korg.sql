@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "calls" (
 	"date" timestamp NOT NULL,
 	"title" text NOT NULL,
 	"summary" text NOT NULL,
-	"transcript" text NOT NULL,
+	"transcript" jsonb NOT NULL,
 	"insights" text NOT NULL,
 	"user_id" integer NOT NULL,
 	"call_type" text NOT NULL
@@ -14,16 +14,19 @@ CREATE TABLE IF NOT EXISTS "schedule" (
 	"time" timestamp NOT NULL,
 	"user_id" integer NOT NULL,
 	"frequency" text NOT NULL,
-	"last_call_timestamp" timestamp
+	"last_call_timestamp" timestamp,
+	"active_days" json NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" serial PRIMARY KEY NOT NULL,
+	"clerk_id" text NOT NULL,
 	"name" text NOT NULL,
+	"email" text NOT NULL,
 	"photo" text,
 	"subscription" text,
 	"free_calls_left" integer NOT NULL,
-	"phone_number" text NOT NULL
+	"phone_number" text
 );
 --> statement-breakpoint
 DO $$ BEGIN
