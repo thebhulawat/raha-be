@@ -9,11 +9,13 @@ import {
 
 export const usersTable = pgTable('users', {
   id: serial('id').primaryKey(),
+  clerkId: text('clerk_id').notNull(),
   name: text('name').notNull(),
+  email: text('email').notNull(),
   photo: text('photo'),
   subscription: text('subscription'),
   freeCallsLeft: integer('free_calls_left').notNull(),
-  phoneNumber: text('phone_number').notNull(),
+  phoneNumber: text('phone_number'),
 });
 
 export const callsTable = pgTable('calls', {

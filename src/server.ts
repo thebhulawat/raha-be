@@ -9,6 +9,10 @@ import { OpenAiClient } from './llm/openai';
 import { RetellClient } from './retell/client';
 import { ClerkExpressRequireAuth, WithAuthProp } from '@clerk/clerk-sdk-node';
 import { CallScheduler } from './scheduler/callScheduler';
+import { Webhook } from 'svix';
+import bodyParser from 'body-parser';
+import {buffer} from 'micro'
+import  handleClerkWebhookContoller from './webhook/clerkWebhookHandler';
 
 export class Server {
   public app: expressWs.Application;
@@ -21,13 +25,13 @@ export class Server {
     this.app.use(express.json());
     this.app.use(cors());
     this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(ClerkExpressRequireAuth());
+    //this.app.use(ClerkExpressRequireAuth());
 
     // handle errors
-    this.app.use((err: any, req: any, res: any, next: any) => {
-      console.error(err.stack);
-      res.status(401).send('Unauthenticated!');
-    });
+    // this.app.use((err: any, req: any, res: any, next: any) => {
+    //   console.error(err.stack);
+    //   res.status(401).send('Unauthenticated!');
+    // });
 
     // Set up dependencies
     this.retellClient = new RetellClient();
@@ -36,6 +40,8 @@ export class Server {
     this.handleRetellLlmWebSocket();
     this.createPhoneCall();
     this.handleWebhook();
+    this.handleClerkWebhook();
+
     this.helloRaha();
     this.callScheduler = new CallScheduler(
       `http://localhost:${process.env.PORT || 3000}`
@@ -55,6 +61,14 @@ export class Server {
       // console.log('Authenticated user:', auth);
       res.json({ message: 'hello Raha', user: auth });
     });
+  }
+
+  handleClerkWebhook() {
+    this.app.post(
+      "/clerk-webhook",
+      bodyParser.raw({ type: 'application/json' }),
+      handleClerkWebhookContoller
+    );
   }
 
   /* This webhook is used to handle webhooks from retell servers which has a number of events. We will be handling all the events here. */
