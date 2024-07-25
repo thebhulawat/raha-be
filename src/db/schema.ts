@@ -1,3 +1,4 @@
+
 import {
   integer,
   pgTable,
@@ -5,7 +6,7 @@ import {
   text,
   timestamp,
   jsonb,
-  json,
+  boolean
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
@@ -37,13 +38,12 @@ export const callsTable = pgTable('calls', {
 
 export const scheduleTable = pgTable('schedule', {
   id: serial('id').primaryKey(),
-  time: timestamp('time').notNull(),
+  time: text('time').notNull(),
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
-  frequency: text('frequency', { enum: ['daily', 'weekly'] }).notNull(),
-  lastCallTimestamp: timestamp('last_call_timestamp'),
-  activeDays: json('active_days').notNull().$type<number[]>(),
+  scheduleFrequency: text('schedule_frequency', { enum: ['daily', 'weekly'] }).notNull(),
+  scheduleDays: boolean('schedule_days').array().notNull(),
 });
 
 export type InsertSchedule = typeof scheduleTable.$inferInsert;

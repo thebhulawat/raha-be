@@ -24,6 +24,7 @@
     "fast-xml-parser": "^4.4.0",
     "langchain": "^0.2.10",
     "micro": "^10.0.1",
+    "moment-timezone": "^0.5.45",
     "node-cron": "^3.0.3",
     "openai": "^4.52.7",
     "postgres": "^3.4.4",

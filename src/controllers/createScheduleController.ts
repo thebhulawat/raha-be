@@ -3,6 +3,7 @@ import { db } from '../db';
 import { scheduleTable, usersTable } from '../db/schema';
 import { InsertSchedule } from '../db/schema';
 import { getUserFromClerkId } from '../utils/dbUtils';
+import moment from 'moment-timezone';
 
 export default async function createSchedule(req: Request, res: Response) {
   try {
@@ -11,12 +12,19 @@ export default async function createSchedule(req: Request, res: Response) {
     }
 
     const clerkUserId = req.auth.userId;
-
-    const { time, frequency, activeDays } = req.body;
+    const { time, frequency, scheduleDays, timezone } = req.body;
 
     // Validate input
-    if (!time || !frequency || !Array.isArray(activeDays)) {
+    if (!time || !frequency || !Array.isArray(scheduleDays) || !timezone) {
       return res.status(400).json({ error: 'Invalid input' });
+    }
+
+    if (frequency !== 'daily' && frequency !== 'weekly') {
+      return res.status(400).json({error: 'Invalid frequency'})
+    }
+
+    if (scheduleDays.length !== 7 && !scheduleDays.every(day => typeof day === 'boolean' )) {
+      return res.status(400).json({error: 'Invalid schedule days'})
     }
 
     // Fetch user from the database
@@ -26,13 +34,16 @@ export default async function createSchedule(req: Request, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Convert time to UTC 
+    const localtime = moment.tz(time, "HH:mm", timezone)
+    const utcTime = localtime.clone().tz("UTC").format("HH:mm")
+
     // Prepare the schedule data
     const newSchedule: InsertSchedule = {
-      time: new Date(time),
+      time: utcTime,
       userId: user[0].id,
-      frequency: frequency as 'daily' | 'weekly',
-      activeDays: activeDays,
-      lastCallTimestamp: null // Initially set to null
+      scheduleFrequency: frequency, 
+      scheduleDays: scheduleDays,
     };
 
     // Insert the new schedule
