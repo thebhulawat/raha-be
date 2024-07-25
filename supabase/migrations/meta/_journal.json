@@ -8,6 +8,13 @@
       "when": 1721832519198,
       "tag": "0000_outgoing_korg",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1721893789195,
+      "tag": "0001_right_warlock",
+      "breakpoints": true
     }
   ]
 }

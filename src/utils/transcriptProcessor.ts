@@ -1,19 +1,31 @@
 import { db } from '../db/index';
-import { callsTable, InsertCall } from '../db/schema';
+import { callsTable, InsertCall, usersTable } from '../db/schema';
 import { ChatOpenAI } from '@langchain/openai';
 import * as hub from 'langchain/hub';
 import { promptVariables } from './promptVariables';
 import { XMLParser } from 'fast-xml-parser';
+import { eq } from 'drizzle-orm';
 
-export async function processTranscript(transcript: any[], callId: string) {
-  //TODO - Add the user's real name here
+export async function processTranscript(transcript: any[], callData: any) {
   try {
+    // Retrieve user information based on the phone number
+    const userPhone = callData.to_number;
+    const user = await db.select().from(usersTable).where(eq(usersTable.phoneNumber, userPhone)).limit(1);
+
+    if (user.length === 0) {
+      throw new Error(`User not found for phone number: ${userPhone}`);
+    }
+
+    const userName = user[0].firstName;
+    const userId = user[0].id;
+
+
     // Extract relevant information from the transcript
     const transcriptObject: { role: string; content: string }[] = [];
     var transcriptString: string = '';
     transcript.forEach((t) => {
       const role =
-        t.role === 'agent' ? 'Raha' : t.role === 'user' ? 'User' : t.role;
+        t.role === 'agent' ? 'Raha' : t.role === 'user' ? userName : t.role;
       transcriptObject.push({ role, content: t.content });
       transcriptString += `${role}: ${t.content}\n`;
     });
@@ -24,25 +36,35 @@ export async function processTranscript(transcript: any[], callId: string) {
 
     console.log('Analysed', title, summary, insights);
 
-    // Prepare the call data
-    // const callData: InsertCall = {
-    //   date: new Date(),
-    //   title: title,
-    //   summary,
-    //   transcript: transcriptObject,
-    //   insights,
-    //   userId: 1, // You'll need to determine the correct userId
-    //   callType: 'ad_hoc', // Assuming this is an ad-hoc call
-    // };
 
-    // // Insert the call data into the database
-    // await db.insert(callsTable).values(callData);
+    // Prepare the call data
+    const callDataToInsert: InsertCall = {
+      date: new Date(callData.start_timestamp),
+      retellCallId: callData.call_id,
+      title: title,
+      summary: summary,
+      transcript: transcriptObject,
+      insights: JSON.stringify(insights),
+      userId: userId,
+    };
+
+    // Insert the call data into the database
+    await db.insert(callsTable).values(callDataToInsert);
+
+    // Decrement the free calls if available 
+    const currentFreeCallsLeft = user[0].freeCallsLeft
+    if (currentFreeCallsLeft > 0 ) {
+      await db.update(usersTable).set({
+        freeCallsLeft: currentFreeCallsLeft - 1
+      }).where(eq(usersTable.id, userId))
+    }
 
     console.log(
-      `Transcript for call ${callId} processed and saved to the database.`
+      `Transcript for call ${callData.call_id} processed and saved to the database.`
     );
   } catch (error) {
-    console.error(`Error processing transcript for call ${callId}:`, error);
+    console.error(`Error processing transcript for call ${callData.call_id}:`, error);
+    throw new Error(`Error processing transcript for call ${callData.call_id}:` + error);
   }
 }
 

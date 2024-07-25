@@ -83,13 +83,12 @@ async function handleUserCreated(data: any) {
   const primaryEmail = email_addresses.find((email: any) => email.id === data.primary_email_address_id)?.email_address;
   const primaryPhone = phone_numbers.find((phone: any) => phone.id === data.primary_phone_number_id)?.phone_number;
 
-  const name = `${first_name} ${last_name}`.trim();
 
   if (!id) {
     throw new Error("Clerk Id is required");
   }
 
-  if (!name) {
+  if (!first_name) {
     throw new Error("User name is required");
   }
 
@@ -99,7 +98,8 @@ async function handleUserCreated(data: any) {
 
   const newUser: InsertUser = {
     clerkId: id,
-    name: name,
+    firstName: first_name,
+    lastName: last_name,
     email: primaryEmail,
     photo: image_url || null,
     subscription: 'free', // Default subscription
@@ -117,13 +117,11 @@ async function handleUserUpdated(data: any) {
   const primaryEmail = email_addresses.find((email: any) => email.id === data.primary_email_address_id)?.email_address;
   const primaryPhone = phone_numbers.find((phone: any) => phone.id === data.primary_phone_number_id)?.phone_number;
 
-  const name = `${first_name} ${last_name}`.trim();
-
   if (!id) {
     throw new Error("Clerk Id is required");
   }
 
-  if (!name) {
+  if (!first_name) {
     throw new Error("User name is required");
   }
 
@@ -132,7 +130,8 @@ async function handleUserUpdated(data: any) {
   }
 
   const updatedUser: Partial<InsertUser> = {
-    name: name,
+    firstName: first_name,
+    lastName: last_name,
     email: primaryEmail,
     photo: image_url || null,
     phoneNumber: primaryPhone || null,

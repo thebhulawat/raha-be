@@ -38,15 +38,15 @@ export class Server {
   private setupRoutes() {
     // Authenticated routes 
     this.app.get('/', requireAuth, helloRaha);
-    this.app.get('/calls', requireAuth, getCalls)
     this.app.post('/create-phone-call', requireAuth, createPhoneCall);
+    this.app.get('/calls', requireAuth, getCalls)
     this.app.post('/create-schedule', requireAuth, createSchedule);
     
     // Websocket route 
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
     
     // Webhooks 
-    this.app.post('/webhook', handleRetellWebhook);
+    this.app.post('/retell-webhook', handleRetellWebhook);
     this.app.post(
       '/clerk-webhook',
       bodyParser.raw({ type: 'application/json' }),

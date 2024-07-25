@@ -11,7 +11,8 @@ import {
 export const usersTable = pgTable('users', {
   id: serial('id').primaryKey(),
   clerkId: text('clerk_id').notNull(),
-  name: text('name').notNull(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name'),
   email: text('email').notNull(),
   photo: text('photo'),
   subscription: text('subscription'),
@@ -21,6 +22,7 @@ export const usersTable = pgTable('users', {
 
 export const callsTable = pgTable('calls', {
   id: serial('id').primaryKey(),
+  retellCallId: text('retell_call_id').notNull(),
   date: timestamp('date').notNull(),
   title: text('title').notNull(),
   summary: text('summary').notNull(),
@@ -31,7 +33,6 @@ export const callsTable = pgTable('calls', {
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
-  callType: text('call_type', { enum: ['scheduled', 'ad_hoc'] }).notNull(),
 });
 
 export const scheduleTable = pgTable('schedule', {

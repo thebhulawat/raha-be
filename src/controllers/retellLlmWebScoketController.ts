@@ -28,7 +28,7 @@ export default function handleRetellLlmWebSocket(ws: WebSocket, req: Request) {
 
   ws.on('close', () => {
     console.error('Closing llm ws for: ', callId);
-    processTranscript(fullTranscript, callId);
+    //processTranscript(fullTranscript, callId);
   });
 
   ws.on('message', async (data: RawData) => {
@@ -59,8 +59,8 @@ export default function handleRetellLlmWebSocket(ws: WebSocket, req: Request) {
         ws.send(JSON.stringify(pingpongResponse));
         break;
       case 'update_only':
-        fullTranscript = request.transcript;
-        console.log('Transcript updated:', request);
+        //fullTranscript = request.transcript;
+        //console.log('Transcript updated:', request);
         break;
     }
   });

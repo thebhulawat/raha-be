@@ -6,7 +6,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) => 
 
   checkAuth(req, res, (error) => {
     if (error) {
-      res.status(401).json({ error: 'Unauthorized: Authentication required' });
+      res.status(401).json({ error: 'Unauthorized' });
     } else {
       next();
     }

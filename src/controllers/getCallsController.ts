@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { db } from '../db';
 import { callsTable, usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import { WithAuthProp } from '@clerk/clerk-sdk-node';
+import { getUserFromClerkId } from '../utils/dbUtils';
 
 export async function getCalls(req: Request, res: Response) {
   try {
@@ -15,8 +15,7 @@ export async function getCalls(req: Request, res: Response) {
 
     const clerkUserId = req.auth.userId;
 
-    // Fetch user from the database
-    const user = await db.select().from(usersTable).where(eq(usersTable.clerkId, clerkUserId)).limit(1);
+    const user = await getUserFromClerkId(clerkUserId)
 
     if (!user || user.length === 0) {
       return res.status(404).json({ error: 'User not found' });

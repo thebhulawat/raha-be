@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import { db } from '../db';
 import { scheduleTable, usersTable } from '../db/schema';
-import { eq } from 'drizzle-orm';
 import { InsertSchedule } from '../db/schema';
+import { getUserFromClerkId } from '../utils/dbUtils';
 
 export default async function createSchedule(req: Request, res: Response) {
   try {
@@ -20,10 +20,7 @@ export default async function createSchedule(req: Request, res: Response) {
     }
 
     // Fetch user from the database
-    const user = await db.select()
-      .from(usersTable)
-      .where(eq(usersTable.clerkId, clerkUserId))
-      .limit(1);
+    const user = await getUserFromClerkId(clerkUserId)
 
     if (user.length === 0) {
       return res.status(404).json({ error: 'User not found' });
