@@ -1,19 +1,19 @@
 import { db } from '../db/index';
 import { scheduleTable, usersTable } from '../db/schema';
-import { eq, lte } from 'drizzle-orm';
-import axios from 'axios';
+import { eq } from 'drizzle-orm';
 import cron from 'node-cron';
+import { RetellClient } from '../clients/retellClient';
 
 export class CallScheduler {
-  private serverUrl: string;
+  private retellClient: RetellClient;
 
-  constructor(serverUrl: string) {
-    this.serverUrl = serverUrl;
+  constructor() {
+    this.retellClient = new RetellClient();
   }
 
   public start() {
-    // Run every 5 minutes
-    cron.schedule('*/5 * * * *', async () => {
+    // Run every minute
+    cron.schedule('* * * * *', async () => {
       console.log('Running scheduled call check...');
       await this.checkAndTriggerCalls();
     });
@@ -21,62 +21,63 @@ export class CallScheduler {
 
   private async checkAndTriggerCalls() {
     const now = new Date();
+    const currentDay = now.getDay();
+    const currentTime = this.getCurrentUTCTimeString();
+
+    console.log(`Current day: ${currentDay}, Current time: ${currentTime}`);
+
     const scheduledCalls = await db
       .select({
-        scheduleId: scheduleTable.id,
-        userId: scheduleTable.userId,
-        time: scheduleTable.time,
         frequency: scheduleTable.scheduleFrequency,
         phoneNumber: usersTable.phoneNumber,
         scheduleDays: scheduleTable.scheduleDays,
       })
       .from(scheduleTable)
       .leftJoin(usersTable, eq(scheduleTable.userId, usersTable.id))
+      .where(eq(scheduleTable.time, currentTime));
 
-    // for (const call of scheduledCalls) {
-    //   if (this.shouldTriggerCall(call, now) && call.phoneNumber) {
-    //     await this.triggerCall(call.phoneNumber);
-    //   }
-    // }
+    console.log(`Found ${scheduledCalls.length} scheduled calls for the current time`);
+
+    for (const call of scheduledCalls) {
+      if (this.shouldTriggerCall(call, currentDay) && call.phoneNumber) {
+        await this.triggerCall(call.phoneNumber);
+      }
+    }
   }
 
-  // private shouldTriggerCall(
-  //   call: {
-  //     time: Date;
-  //     frequency: string;
-  //     activeDays: number[];
-  //   },
-  //   now: Date
-  // ): boolean {
+  private getCurrentUTCTimeString(): string {
+    const now = new Date();
+    const hoursUTC = now.getUTCHours().toString().padStart(2, '0');
+    const minutesUTC = now.getUTCMinutes().toString().padStart(2, '0');
+    return `${hoursUTC}:${minutesUTC}`;
+  }
 
-  //   const currentDay = now.getDay();
-  //   const currentTime = now.getHours() * 60 + now.getMinutes();
-  //   const scheduleTime = call.time.getHours() * 60 + call.time.getMinutes();
+  private shouldTriggerCall(
+    call: {
+      frequency: string;
+      scheduleDays: boolean[];
+      phoneNumber: string | null;
+    },
+    currentDay: number
+  ): boolean {
+    if (!call.phoneNumber) return false;
 
-  //   if (call.frequency === 'daily') {
-  //     const timeSinceLastCall =
-  //       now.getTime() - call.lastCallTimestamp.getTime();
-  //     return timeSinceLastCall >= 24 * 60 * 60 * 1000;
-  //   } else if (call.frequency === 'weekly') {
-  //     if (!call.activeDays.includes(currentDay)) return false;
+    if (call.frequency === 'daily') {
+      return true;
+    } else if (call.frequency === 'weekly') {
+      return call.scheduleDays[currentDay];
+    }
 
-  //     const lastCallDate = new Date(call.lastCallTimestamp);
-  //     lastCallDate.setHours(0, 0, 0, 0);
-  //     const nowDate = new Date(now);
-  //     nowDate.setHours(0, 0, 0, 0);
+    return false;
+  }
 
-  //     return lastCallDate < nowDate && currentTime >= scheduleTime;
-  //   }
-
-  //   return false;
-  // }
-
-  // private async triggerCall(phoneNumber: string) {
-  //   try {
-  //     await axios.post(`${this.serverUrl}/create-phone-call`, { phoneNumber });
-  //     console.log(`Triggered call for ${phoneNumber}`);
-  //   } catch (error) {
-  //     console.error(`Failed to trigger call for ${phoneNumber}:`, error);
-  //   }
-  // }
+  private async triggerCall(phoneNumber: string) {
+    try {
+      console.log(`Attempting to trigger call for ${phoneNumber}`);
+      const response = await this.retellClient.createCall(phoneNumber);
+      console.log(`Successfully triggered call for ${phoneNumber}. Response:`, response);
+    } catch (error) {
+      console.error(`Failed to trigger call for ${phoneNumber}:`, error);
+    }
+  }
 }

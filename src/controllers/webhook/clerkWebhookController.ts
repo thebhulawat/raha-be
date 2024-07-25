@@ -105,6 +105,9 @@ async function handleUserCreated(data: any) {
     subscription: 'free', // Default subscription
     freeCallsLeft: 3, // Default number of free calls
     phoneNumber: primaryPhone || null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+
   };
 
   await db.insert(usersTable).values(newUser);
@@ -135,6 +138,7 @@ async function handleUserUpdated(data: any) {
     email: primaryEmail,
     photo: image_url || null,
     phoneNumber: primaryPhone || null,
+    updatedAt: new Date().toISOString()
   };
 
   await db.update(usersTable)

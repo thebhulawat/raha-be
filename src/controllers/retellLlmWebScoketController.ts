@@ -48,7 +48,7 @@ export default function handleRetellLlmWebSocket(ws: WebSocket, req: Request) {
       case 'reminder_required':
       case 'response_required':
         console.clear();
-        console.log('req', request);
+        console.log('req object received in the websocket/n', request);
         llmClient.DraftResponse(request, ws);
         break;
       case 'ping_pong':

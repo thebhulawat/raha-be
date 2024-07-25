@@ -46,6 +46,8 @@ export async function processTranscript(transcript: any[], callData: any) {
       transcript: transcriptObject,
       insights: JSON.stringify(insights),
       userId: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
 
     // Insert the call data into the database

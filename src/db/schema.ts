@@ -19,6 +19,8 @@ export const usersTable = pgTable('users', {
   subscription: text('subscription'),
   freeCallsLeft: integer('free_calls_left').notNull(),
   phoneNumber: text('phone_number'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull()
 });
 
 export const callsTable = pgTable('calls', {
@@ -34,6 +36,8 @@ export const callsTable = pgTable('calls', {
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull()
 });
 
 export const scheduleTable = pgTable('schedule', {
@@ -44,6 +48,8 @@ export const scheduleTable = pgTable('schedule', {
     .references(() => usersTable.id, { onDelete: 'cascade' }),
   scheduleFrequency: text('schedule_frequency', { enum: ['daily', 'weekly'] }).notNull(),
   scheduleDays: boolean('schedule_days').array().notNull(),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull()
 });
 
 export type InsertSchedule = typeof scheduleTable.$inferInsert;

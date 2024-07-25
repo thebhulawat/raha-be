@@ -12,7 +12,7 @@ import  handleRetellWebhook from './controllers/webhook/retellWebhookController'
 import handleClerkWebhook from './controllers/webhook/clerkWebhookController';
 import { requireAuth } from './middleware/authMiddleware';
 import getCalls from './controllers/getCallsController';
-import createSchedule from './controllers/createScheduleController';
+import createOrUpdateSchedule from './controllers/createScheduleController';
 import { deleteSchedule } from './controllers/deleteScheduleController';
 
 export class Server {
@@ -31,9 +31,8 @@ export class Server {
     this.setupRoutes();
 
     // Set up scehduler 
-    this.callScheduler = new CallScheduler(
-      `http://localhost:${process.env.PORT || 3000}`
-    );
+    this.callScheduler = new CallScheduler();
+    this.callScheduler.start()
   }
 
   private setupRoutes() {
@@ -41,7 +40,7 @@ export class Server {
     this.app.get('/', requireAuth, helloRaha);
     this.app.post('/calls', requireAuth, createPhoneCall);
     this.app.get('/calls', requireAuth, getCalls)
-    this.app.post('/schedules', requireAuth, createSchedule);
+    this.app.post('/schedules', requireAuth, createOrUpdateSchedule);
     this.app.delete('/schedules', requireAuth, deleteSchedule)
     
     // Websocket route 
