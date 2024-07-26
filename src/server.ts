@@ -15,6 +15,7 @@ import getCalls from './controllers/calls/getCalls';
 import createOrUpdateSchedule from './controllers/calls/createSchedule';
 import { deleteSchedule } from './controllers/calls/deleteSchedule';
 import handlePaddleWebhook from './controllers/webhooks/paddle';
+import getUser from './controllers/user/getUser';
 
 export class Server {
   public app: expressWs.Application;
@@ -43,6 +44,7 @@ export class Server {
     this.app.get('/calls', requireAuth, getCalls);
     this.app.post('/schedules', requireAuth, createOrUpdateSchedule);
     this.app.delete('/schedules', requireAuth, deleteSchedule);
+    this.app.get('/user', requireAuth, getUser);
 
     // Websocket route
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
