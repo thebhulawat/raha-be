@@ -24,7 +24,17 @@ export class Server {
   constructor() {
     this.app = expressWs(express()).app;
 
+    // TODO: this might cause trouble with the incoming webhooks 
+    // const corsOptions = {
+    //   origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+    //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+    //   credentials: true, 
+    //   optionsSuccessStatus: 200, 
+    // }
+
+    
     // Middlewares
+    //this.app.use(cors(corsOptions))
     this.app.use(express.json());
     this.app.use(cors());
     this.app.use(express.urlencoded({ extended: true }));
@@ -44,7 +54,7 @@ export class Server {
     this.app.get('/calls', requireAuth, getCalls);
     this.app.post('/schedules', requireAuth, createOrUpdateSchedule);
     this.app.delete('/schedules', requireAuth, deleteSchedule);
-    this.app.get('/user', requireAuth, getUser);
+    this.app.get('/users', requireAuth, getUser);
 
     // Websocket route
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);

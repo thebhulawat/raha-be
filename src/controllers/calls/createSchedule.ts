@@ -16,14 +16,14 @@ export default async function createOrUpdateSchedule(
     }
 
     const clerkUserId = req.auth.userId;
-    const { time, frequency, scheduleDays, timezone } = req.body;
+    const { time, scheduleFrequency, scheduleDays, timezone } = req.body;
 
     // Validate input
-    if (!time || !frequency || !Array.isArray(scheduleDays) || !timezone) {
+    if (!time || !scheduleFrequency || !Array.isArray(scheduleDays) || !timezone) {
       return res.status(400).json({ error: 'Invalid input' });
     }
 
-    if (frequency !== 'daily' && frequency !== 'weekly') {
+    if (scheduleFrequency !== 'daily' && scheduleFrequency !== 'weekly') {
       return res.status(400).json({ error: 'Invalid frequency' });
     }
 
@@ -49,7 +49,7 @@ export default async function createOrUpdateSchedule(
     const scheduleData: Omit<InsertSchedule, 'id'> = {
       time: utcTime,
       userId: user[0].id,
-      scheduleFrequency: frequency,
+      scheduleFrequency: scheduleFrequency,
       scheduleDays: scheduleDays,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
