@@ -1,8 +1,8 @@
 import { WebSocket, RawData } from 'ws';
 import { Request } from 'express';
-import { CustomLlmRequest, CustomLlmResponse } from '../types/types';
-import { OpenAiClient } from '../clients/openai';
-import { processTranscript } from '../utils/transcriptProcessor';
+import { CustomLlmRequest, CustomLlmResponse } from '../../types/types';
+import { OpenAiClient } from '../../clients/openai';
+import { processTranscript } from '../../utils/transcriptProcessor';
 
 export default function handleRetellLlmWebSocket(ws: WebSocket, req: Request) {
   const callId = req.params.call_id;

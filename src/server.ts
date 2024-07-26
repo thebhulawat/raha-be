@@ -3,18 +3,18 @@ import expressWs from 'express-ws';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { RetellClient } from './clients/retellClient';
+import { RetellClient } from './clients/retell';
 import { CallScheduler } from './utils/callScheduler';
-import helloRaha from './controllers/helloRahaController';
-import createPhoneCall from './controllers/createPhoneCallController';
-import handleRetellLlmWebSocket from './controllers/retellLlmWebScoketController';
-import handleRetellWebhook from './controllers/webhook/retellWebhookController';
-import handleClerkWebhook from './controllers/webhook/clerkWebhookController';
-import { requireAuth } from './middleware/authMiddleware';
-import getCalls from './controllers/getCallsController';
-import createOrUpdateSchedule from './controllers/createScheduleController';
-import { deleteSchedule } from './controllers/deleteScheduleController';
-import handlePaddleWebhook from './controllers/webhook/paddleWebhookController';
+import helloRaha from './controllers/helloRaha';
+import createPhoneCall from './controllers/calls/createPhoneCall';
+import handleRetellLlmWebSocket from './controllers/websockets/retellLlm';
+import handleRetellWebhook from './controllers/webhooks/retell';
+import handleClerkWebhook from './controllers/webhooks/clerk';
+import { requireAuth } from './middleware/auth';
+import getCalls from './controllers/calls/getCalls';
+import createOrUpdateSchedule from './controllers/calls/createSchedule';
+import { deleteSchedule } from './controllers/calls/deleteSchedule';
+import handlePaddleWebhook from './controllers/webhooks/paddle';
 
 export class Server {
   public app: expressWs.Application;
@@ -31,20 +31,20 @@ export class Server {
     // Set up routes
     this.setupRoutes();
 
-    // Set up scehduler 
+    // Set up scehduler
     this.callScheduler = new CallScheduler();
-    this.callScheduler.start()
+    this.callScheduler.start();
   }
 
   private setupRoutes() {
     // Authenticated routes
     this.app.get('/', requireAuth, helloRaha);
     this.app.post('/calls', requireAuth, createPhoneCall);
-    this.app.get('/calls', requireAuth, getCalls)
+    this.app.get('/calls', requireAuth, getCalls);
     this.app.post('/schedules', requireAuth, createOrUpdateSchedule);
-    this.app.delete('/schedules', requireAuth, deleteSchedule)
-    
-    // Websocket route 
+    this.app.delete('/schedules', requireAuth, deleteSchedule);
+
+    // Websocket route
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
 
     // Webhooks

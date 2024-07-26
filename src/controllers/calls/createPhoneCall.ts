@@ -1,30 +1,32 @@
 import { Request, Response } from 'express';
-import { RetellClient } from '../clients/retellClient';
-import { db } from '../db';
-import { usersTable } from '../db/schema';
+import { RetellClient } from '../../clients/retell';
+import { db } from '../../db';
+import { usersTable } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import { getUserFromClerkId } from '../utils/dbUtils';
+import { getUserFromClerkId } from '../../utils/db';
 import { error } from 'console';
 
 export default async function createPhoneCall(req: Request, res: Response) {
   try {
     if (!req.auth || !req.auth.userId) {
-      return res.status(401).json({error: 'Unauthorized'})
+      return res.status(401).json({ error: 'Unauthorized' });
     }
-    const clerkUserId = req.auth.userId
-    const user = await getUserFromClerkId(clerkUserId)
+    const clerkUserId = req.auth.userId;
+    const user = await getUserFromClerkId(clerkUserId);
 
-    if (user.length === 0 ) {
-      return res.status(404).json({error: 'User not found'})
+    if (user.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
     if (!user[0].phoneNumber) {
-      return res.status(404).json({error: 'No phone associated with the user'})
+      return res
+        .status(404)
+        .json({ error: 'No phone associated with the user' });
     }
 
-    // TODO: Check for free calls / subscription here. 
+    // TODO: Check for free calls / subscription here.
 
-    // Call retell client 
+    // Call retell client
     const retellClient = new RetellClient();
     const result = await retellClient.createCall(user[0].phoneNumber);
     res.status(200).json(result);

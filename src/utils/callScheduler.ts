@@ -2,7 +2,7 @@ import { db } from '../db/index';
 import { scheduleTable, usersTable } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import cron from 'node-cron';
-import { RetellClient } from '../clients/retellClient';
+import { RetellClient } from '../clients/retell';
 
 export class CallScheduler {
   private retellClient: RetellClient;
