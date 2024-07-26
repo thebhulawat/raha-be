@@ -12,8 +12,8 @@ export class CallScheduler {
   }
 
   public start() {
-    // Run every minute
-    cron.schedule('* * * * *', async () => {
+    // Run every 5th minute
+    cron.schedule('*/5 * * * *', async () => {
       console.log('Running scheduled call check...');
       await this.checkAndTriggerCalls();
     });
@@ -36,7 +36,9 @@ export class CallScheduler {
       .leftJoin(usersTable, eq(scheduleTable.userId, usersTable.id))
       .where(eq(scheduleTable.time, currentTime));
 
-    console.log(`Found ${scheduledCalls.length} scheduled calls for the current time`);
+    console.log(
+      `Found ${scheduledCalls.length} scheduled calls for the current time`
+    );
 
     for (const call of scheduledCalls) {
       if (this.shouldTriggerCall(call, currentDay) && call.phoneNumber) {
@@ -75,7 +77,10 @@ export class CallScheduler {
     try {
       console.log(`Attempting to trigger call for ${phoneNumber}`);
       const response = await this.retellClient.createCall(phoneNumber);
-      console.log(`Successfully triggered call for ${phoneNumber}. Response:`, response);
+      console.log(
+        `Successfully triggered call for ${phoneNumber}. Response:`,
+        response
+      );
     } catch (error) {
       console.error(`Failed to trigger call for ${phoneNumber}:`, error);
     }

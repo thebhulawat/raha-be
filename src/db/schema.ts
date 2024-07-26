@@ -1,4 +1,3 @@
-
 import {
   integer,
   pgTable,
@@ -6,7 +5,8 @@ import {
   text,
   timestamp,
   jsonb,
-  boolean
+  boolean,
+  json,
 } from 'drizzle-orm/pg-core';
 
 export const usersTable = pgTable('users', {
@@ -16,11 +16,20 @@ export const usersTable = pgTable('users', {
   lastName: text('last_name'),
   email: text('email').notNull(),
   photo: text('photo'),
-  subscription: text('subscription'),
   freeCallsLeft: integer('free_calls_left').notNull(),
   phoneNumber: text('phone_number'),
   createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull()
+  updatedAt: text('updated_at').notNull(),
+  subscriptionStatus: text('subscription_status', {
+    enum: ['active', 'canceled', 'past_due', 'paused', 'trialing', 'free'],
+  }),
+  paddleCustomerId: text('paddle_customer_id'),
+  paddleSubscriptionId: text('paddle_subscription_id'),
+  subscriptionItems: json('subscription_items'),
+  collectionMode: text('collection_mode'),
+  subscriptionCreatedAt: timestamp('subscription_occurred_at'),
+  subscriptionNextBilledAt: timestamp('subscription_next_billed_at'),
+  subscriptionScheduledChange: json('subscription_scheduled_change'),
 });
 
 export const callsTable = pgTable('calls', {
@@ -37,7 +46,7 @@ export const callsTable = pgTable('calls', {
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
   createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull()
+  updatedAt: text('updated_at').notNull(),
 });
 
 export const scheduleTable = pgTable('schedule', {
@@ -46,10 +55,12 @@ export const scheduleTable = pgTable('schedule', {
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
-  scheduleFrequency: text('schedule_frequency', { enum: ['daily', 'weekly'] }).notNull(),
+  scheduleFrequency: text('schedule_frequency', {
+    enum: ['daily', 'weekly'],
+  }).notNull(),
   scheduleDays: boolean('schedule_days').array().notNull(),
   createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull()
+  updatedAt: text('updated_at').notNull(),
 });
 
 export type InsertSchedule = typeof scheduleTable.$inferInsert;

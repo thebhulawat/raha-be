@@ -8,12 +8,13 @@ import { CallScheduler } from './utils/callScheduler';
 import helloRaha from './controllers/helloRahaController';
 import createPhoneCall from './controllers/createPhoneCallController';
 import handleRetellLlmWebSocket from './controllers/retellLlmWebScoketController';
-import  handleRetellWebhook from './controllers/webhook/retellWebhookController';
+import handleRetellWebhook from './controllers/webhook/retellWebhookController';
 import handleClerkWebhook from './controllers/webhook/clerkWebhookController';
 import { requireAuth } from './middleware/authMiddleware';
 import getCalls from './controllers/getCallsController';
 import createOrUpdateSchedule from './controllers/createScheduleController';
 import { deleteSchedule } from './controllers/deleteScheduleController';
+import handlePaddleWebhook from './controllers/webhook/paddleWebhookController';
 
 export class Server {
   public app: expressWs.Application;
@@ -21,7 +22,7 @@ export class Server {
 
   constructor() {
     this.app = expressWs(express()).app;
-    
+
     // Middlewares
     this.app.use(express.json());
     this.app.use(cors());
@@ -36,7 +37,7 @@ export class Server {
   }
 
   private setupRoutes() {
-    // Authenticated routes 
+    // Authenticated routes
     this.app.get('/', requireAuth, helloRaha);
     this.app.post('/calls', requireAuth, createPhoneCall);
     this.app.get('/calls', requireAuth, getCalls)
@@ -45,15 +46,19 @@ export class Server {
     
     // Websocket route 
     this.app.ws('/llm-websocket/:call_id', handleRetellLlmWebSocket);
-    
-    // Webhooks 
+
+    // Webhooks
     this.app.post('/retell-webhook', handleRetellWebhook);
     this.app.post(
       '/clerk-webhook',
       bodyParser.raw({ type: 'application/json' }),
       handleClerkWebhook
     );
-
+    this.app.post(
+      '/paddle-webhook',
+      express.raw({ type: 'application/json' }),
+      handlePaddleWebhook
+    );
   }
 
   public listen(port: number): void {

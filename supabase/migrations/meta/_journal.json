@@ -29,6 +29,13 @@
       "when": 1721922167014,
       "tag": "0003_shallow_stryfe",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1721929809680,
+      "tag": "0004_green_fantastic_four",
+      "breakpoints": true
     }
   ]
 }
