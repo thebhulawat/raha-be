@@ -20,11 +20,18 @@ export default async function createPhoneCall(req: Request, res: Response) {
         .json({ error: 'No phone associated with the user' });
     }
 
-    // TODO: Check for free calls / subscription here.
+    if (user[0].subscriptionStatus !== 'active' && user[0].freeCallsLeft <= 0) {
+      return res
+        .status(403)
+        .json({
+          error: 'No available calls. Please subscribe or purchase more calls.',
+        });
+    }
 
     // Call retell client
     const retellClient = new RetellClient();
     const result = await retellClient.createCall(user[0].phoneNumber);
+    
     res.status(200).json(result);
   } catch (err) {
     if (err instanceof Error) {
