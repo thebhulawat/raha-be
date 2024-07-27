@@ -1,0 +1,1 @@
+ALTER TABLE "calls" ALTER COLUMN "insights" TYPE jsonb USING insights::jsonb;

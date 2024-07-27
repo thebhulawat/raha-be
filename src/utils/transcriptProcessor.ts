@@ -44,7 +44,7 @@ export async function processTranscript(transcript: any[], callData: any) {
       title: title,
       summary: summary,
       transcript: transcriptObject,
-      insights: JSON.stringify(insights),
+      insights: insights.insights,
       userId: userId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

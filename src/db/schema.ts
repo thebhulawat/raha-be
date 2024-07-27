@@ -41,7 +41,9 @@ export const callsTable = pgTable('calls', {
   transcript: jsonb('transcript')
     .notNull()
     .$type<Array<{ role: string; content: string }>>(),
-  insights: text('insights').notNull(),
+  insights: jsonb('insights')
+    .notNull()
+    .$type<Array<{title: string, description: string, emoji: string}>>(),
   userId: integer('user_id')
     .notNull()
     .references(() => usersTable.id, { onDelete: 'cascade' }),
