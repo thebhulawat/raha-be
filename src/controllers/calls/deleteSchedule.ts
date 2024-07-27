@@ -4,6 +4,7 @@ import { db } from '../../db';
 import { scheduleTable } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 
+// TODO: Call this when someone cancl
 export async function deleteSchedule(req: Request, res: Response) {
   try {
     if (!req.auth || !req.auth.userId) {

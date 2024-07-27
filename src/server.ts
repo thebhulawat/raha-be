@@ -16,6 +16,7 @@ import createOrUpdateSchedule from './controllers/calls/createSchedule';
 import { deleteSchedule } from './controllers/calls/deleteSchedule';
 import handlePaddleWebhook from './controllers/webhooks/paddle';
 import getUser from './controllers/user/getUser';
+import getSchedule from './controllers/calls/getSchedule';
 
 export class Server {
   public app: expressWs.Application;
@@ -52,6 +53,7 @@ export class Server {
     this.app.get('/', requireAuth, helloRaha);
     this.app.post('/calls', requireAuth, createPhoneCall);
     this.app.get('/calls', requireAuth, getCalls);
+    this.app.get('/schedules', requireAuth, getSchedule);
     this.app.post('/schedules', requireAuth, createOrUpdateSchedule);
     this.app.delete('/schedules', requireAuth, deleteSchedule);
     this.app.get('/users', requireAuth, getUser);
