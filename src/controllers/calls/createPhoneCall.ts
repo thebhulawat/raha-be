@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
 import { RetellClient } from '../../clients/retell';
-import { db } from '../../db';
-import { usersTable } from '../../db/schema';
-import { eq } from 'drizzle-orm';
 import { getUserFromClerkId } from '../../utils/db';
-import { error } from 'console';
 
 export default async function createPhoneCall(req: Request, res: Response) {
   try {
