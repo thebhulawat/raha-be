@@ -36,7 +36,6 @@ export class Server {
     // Middlewares
     this.app.use(cors(corsOptions))
     this.app.use(express.json());
-    //this.app.use(cors());
     this.app.use(express.urlencoded({ extended: true }));
 
     // Set up routes

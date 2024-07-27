@@ -121,7 +121,6 @@ async function handleUserCreated(data: any) {
     phoneNumber: primaryPhone || null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
-
   };
 
   await db.insert(usersTable).values(newUser);
@@ -162,7 +161,7 @@ async function handleUserUpdated(data: any) {
     email: primaryEmail,
     photo: image_url || null,
     phoneNumber: primaryPhone || null,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
 
   await db
