@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v2
 
@@ -18,13 +19,13 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 6.32.9  # Use the version of pnpm you're using in your project
+          version: 6.32.9 # Use the version of pnpm you're using in your project
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build
-        run: pnpm run build 
+        run: pnpm run build
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
