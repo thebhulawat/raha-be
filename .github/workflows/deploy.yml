@@ -15,11 +15,16 @@ jobs:
         with:
           node-version: '18.17.1'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6.32.9  # Use the version of pnpm you're using in your project
+
       - name: Install dependencies
         run: pnpm install
 
       - name: Build
-        run: npm run build  
+        run: pnpm run build 
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
@@ -32,4 +37,4 @@ jobs:
             git pull origin main
             pnpm install
             pnpm run build 
-            pm2 restart raha-be  
+            pm2 restart raha-be
